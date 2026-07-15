@@ -19,10 +19,10 @@ try {
     docker exec my-photo-gallery-immich-postgres pg_isready -U postgres -d immich
     if ($LASTEXITCODE -ne 0) { throw "Immich PostgreSQL is not ready." }
 
-    $response = Invoke-WebRequest -UseBasicParsing -Uri "http://localhost:2283/api/server/ping" -TimeoutSec 15
+    $response = Invoke-WebRequest -UseBasicParsing -Uri "http://localhost:6001/api/server/ping" -TimeoutSec 15
     if ($response.StatusCode -ne 200) { throw "Immich HTTP health check failed." }
 
-    Write-Host "Immich stack healthy at http://localhost:2283" -ForegroundColor Green
+    Write-Host "Immich stack healthy at http://localhost:6001" -ForegroundColor Green
 }
 finally {
     Pop-Location

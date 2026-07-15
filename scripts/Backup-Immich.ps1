@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string]$BackupRoot = "E:\Immich\backup"
+    [string]$BackupRoot = "D:\Immich\backup"
 )
 
 $ErrorActionPreference = "Stop"

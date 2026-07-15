@@ -4,12 +4,19 @@ Private Immich server running on local Docker Desktop for Windows. Compose proje
 
 ## Storage
 
-- Media library: `E:\Immich\library`
+- Media library: `D:\Immich\library`
 - Database: Docker named volume `my-photo-gallery-immich_postgres-data`
 - ML cache: Docker named volume `my-photo-gallery-immich_model-cache`
-- Backups: `E:\Immich\backup`
+- Backups: `D:\Immich\backup`
 
 Never use Immich as the only copy of photos. Keep database and media backups.
+
+## Ports
+
+| Service | Host port | Container port |
+|---------|-----------|----------------|
+| Immich web UI | `127.0.0.1:6001` | 2283 |
+| PostgreSQL (direct) | `127.0.0.1:6002` | 5432 |
 
 ## Start and verify
 
@@ -22,7 +29,7 @@ docker compose up -d
 .\scripts\Test-Immich.ps1
 ```
 
-Open `http://localhost:2283` and create the first admin account. Port 2283 binds only to localhost until Cloudflare Tunnel is configured.
+Open `http://localhost:6001` and create the first admin account. Port 6001 binds only to localhost until Cloudflare Tunnel is configured.
 
 ## Backup
 
@@ -31,7 +38,7 @@ Set-Location "D:\My Photo Gallery Immich Server"
 .\scripts\Backup-Immich.ps1
 ```
 
-This creates a PostgreSQL custom-format dump and copies Compose configuration into a timestamped folder under `E:\Immich\backup`. Back up `E:\Immich\library` separately to another disk or storage service.
+This creates a PostgreSQL custom-format dump and copies Compose configuration into a timestamped folder under `D:\Immich\backup`. Back up `D:\Immich\library` separately to another disk or storage service.
 
 ## Update
 
@@ -55,4 +62,4 @@ Do not add `--volumes`; that would delete database/cache volumes.
 
 ## Cloudflare later
 
-Finish local admin setup first. Then use Cloudflare Tunnel with origin `http://host.docker.internal:2283` when `cloudflared` runs in Docker, or `http://localhost:2283` when it runs directly on Windows. Keep R2 bucket private and secrets only in local `.env`.
+Finish local admin setup first. Then use Cloudflare Tunnel with origin `http://host.docker.internal:6001` when `cloudflared` runs in Docker, or `http://localhost:6001` when it runs directly on Windows. Keep R2 bucket private and secrets only in local `.env`.

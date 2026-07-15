@@ -6,15 +6,15 @@ name: my-photo-gallery-immich
 services:
   immich-server:
     container_name: my-photo-gallery-immich-server
-    image: ghcr.io/immich-app/immich-server:${IMMICH_VERSION:-v2}
+    image: ghcr.io/immich-app/immich-server:${IMMICH_VERSION:-v3}
     volumes:
-      - ${UPLOAD_LOCATION}:/data
+      - immich-library:/data
       - /etc/localtime:/etc/localtime:ro
     env_file:
       - .env
     ports:
       # Local-only until Immich admin setup and Cloudflare Tunnel configuration finish.
-      - "127.0.0.1:2283:2283"
+      - "127.0.0.1:6001:2283"
     depends_on:
       - redis
       - database
@@ -24,7 +24,7 @@ services:
 
   immich-machine-learning:
     container_name: my-photo-gallery-immich-machine-learning
-    image: ghcr.io/immich-app/immich-machine-learning:${IMMICH_VERSION:-v2}
+    image: ghcr.io/immich-app/immich-machine-learning:${IMMICH_VERSION:-v3}
     volumes:
       - model-cache:/cache
     env_file:
@@ -50,6 +50,8 @@ services:
       POSTGRES_INITDB_ARGS: "--data-checksums"
     volumes:
       - ${DB_DATA_LOCATION}:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:6002:5432"
     shm_size: 128mb
     restart: always
     healthcheck:
@@ -58,3 +60,8 @@ services:
 volumes:
   model-cache:
   postgres-data:
+  immich-library:
+    driver: rclone
+    driver_opts:
+      remote: "my-r2:my-photo-gallery-immich"
+      vfs_cache_mode: "full"
