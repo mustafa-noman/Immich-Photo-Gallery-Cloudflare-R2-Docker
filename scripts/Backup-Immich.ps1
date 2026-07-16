@@ -1,10 +1,18 @@
-[CmdletBinding()]
 param(
-    [string]$BackupRoot = "D:\Immich\backup"
+    [string]$BackupRoot = ""
 )
 
 $ErrorActionPreference = "Stop"
-$projectRoot = Split-Path -Parent $PSScriptRoot
+
+$scriptRoot = $PSScriptRoot
+if ([string]::IsNullOrEmpty($scriptRoot)) {
+    $scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
+}
+
+if ([string]::IsNullOrEmpty($BackupRoot)) {
+    $BackupRoot = Join-Path (Split-Path -Parent $scriptRoot) "backup"
+}
+$projectRoot = Split-Path -Parent $scriptRoot
 $stamp = Get-Date -Format "yyyyMMdd-HHmmss"
 $destination = Join-Path $BackupRoot $stamp
 $containerDump = "/tmp/immich-$stamp.dump"

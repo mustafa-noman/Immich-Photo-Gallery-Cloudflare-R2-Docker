@@ -4,11 +4,26 @@
 name: my-photo-gallery-immich
 
 services:
+  rclone:
+    container_name: my-photo-gallery-immich-rclone
+    image: rclone/rclone:latest
+    restart: always
+    cap_add:
+      - SYS_ADMIN
+    devices:
+      - /dev/fuse:/dev/fuse
+    security_opt:
+      - apparmor:unconfined
+    volumes:
+      - ./rclone-config:/config/rclone
+      - ./rclone-shared-mount:/data:shared
+    command: mount my-r2:my-photo-gallery-immich /data --vfs-cache-mode full --cache-dir /config/cache --allow-other --s3-no-check-bucket --allow-non-empty
+
   immich-server:
     container_name: my-photo-gallery-immich-server
     image: ghcr.io/immich-app/immich-server:${IMMICH_VERSION:-v3}
     volumes:
-      - immich-library:/data
+      - ./rclone-shared-mount:/data
       - /etc/localtime:/etc/localtime:ro
     env_file:
       - .env
@@ -18,6 +33,7 @@ services:
     depends_on:
       - redis
       - database
+      - rclone
     restart: always
     healthcheck:
       disable: false
@@ -49,7 +65,7 @@ services:
       POSTGRES_DB: ${DB_DATABASE_NAME}
       POSTGRES_INITDB_ARGS: "--data-checksums"
     volumes:
-      - ${DB_DATA_LOCATION}:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
     ports:
       - "127.0.0.1:6002:5432"
     shm_size: 128mb
@@ -60,8 +76,3 @@ services:
 volumes:
   model-cache:
   postgres-data:
-  immich-library:
-    driver: rclone
-    driver_opts:
-      remote: "my-r2:my-photo-gallery-immich"
-      vfs_cache_mode: "full"

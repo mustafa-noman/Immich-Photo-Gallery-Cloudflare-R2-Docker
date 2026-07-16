@@ -1,0 +1,7 @@
+[my-r2]
+type = s3
+provider = Cloudflare
+access_key_id = YOUR_CLOUDFLARE_R2_ACCESS_KEY_ID
+secret_access_key = YOUR_CLOUDFLARE_R2_SECRET_ACCESS_KEY
+endpoint = https://YOUR_CLOUDFLARE_R2_ACCOUNT_ID.r2.cloudflarestorage.com
+region = auto
