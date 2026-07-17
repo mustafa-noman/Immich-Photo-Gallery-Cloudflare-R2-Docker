@@ -28,8 +28,7 @@ services:
     env_file:
       - .env
     ports:
-      # Local-only until Immich admin setup and Cloudflare Tunnel configuration finish.
-      - "127.0.0.1:6001:2283"
+      - "6001:2283"
     depends_on:
       - redis
       - database
@@ -67,7 +66,7 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
     ports:
-      - "127.0.0.1:6002:5432"
+      - "6002:5432"
     shm_size: 128mb
     restart: always
     healthcheck:
