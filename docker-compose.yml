@@ -17,7 +17,8 @@ services:
     volumes:
       - ./rclone-config:/config/rclone
       - ./rclone-shared-mount:/data:shared
-    command: mount my-r2:my-photo-gallery-immich /data --vfs-cache-mode full --cache-dir /config/cache --allow-other --s3-no-check-bucket --allow-non-empty
+      - D:/Immich/cache:/config/cache
+    command: mount my-r2:my-photo-gallery-immich /data --vfs-cache-mode full --cache-dir /config/cache --vfs-cache-max-size 10G --vfs-cache-max-age 1h --allow-other --s3-no-check-bucket --allow-non-empty
 
   immich-server:
     container_name: my-photo-gallery-immich-server
