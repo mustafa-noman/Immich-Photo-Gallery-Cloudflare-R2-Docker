@@ -5,3 +5,5 @@ rclone-config/*
 *.log
 .DS_Store
 Thumbs.db
+migration_guide.md
+
