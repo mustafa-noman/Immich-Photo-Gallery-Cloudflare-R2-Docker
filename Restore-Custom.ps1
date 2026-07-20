@@ -7,6 +7,25 @@ if ([string]::IsNullOrEmpty($projectRoot)) {
 }
 
 $BackupRoot = Join-Path $projectRoot "backup"
+$envFile = Join-Path $projectRoot ".env"
+
+$dbUser = "postgres"
+$dbName = "immich"
+
+# Load DB configuration from .env if it exists
+if (Test-Path $envFile) {
+    Write-Host "[*] Loading database configuration from .env file..." -ForegroundColor Cyan
+    Get-Content $envFile | Where-Object { $_ -match '=' -and $_ -notmatch '^#' } | ForEach-Object {
+        $key, $value = $_.Split('=', 2)
+        $key = $key.Trim()
+        $value = $value.Trim()
+        if (($value.StartsWith("'") -and $value.EndsWith("'")) -or ($value.StartsWith('"') -and $value.EndsWith('"'))) {
+            $value = $value.Substring(1, $value.Length - 2)
+        }
+        if ($key -eq "DB_USERNAME") { $dbUser = $value }
+        if ($key -eq "DB_DATABASE_NAME") { $dbName = $value }
+    }
+}
 
 if (-not (Test-Path $BackupRoot)) {
     Write-Error "Backup directory not found at $BackupRoot"
@@ -69,24 +88,24 @@ if ($LASTEXITCODE -ne 0) {
 
 try {
     Write-Host "[*] Terminating existing connections to the database..." -ForegroundColor Yellow
-    docker exec my-photo-gallery-immich-postgres psql -U postgres -d postgres -c "SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = 'immich' AND pid <> pg_backend_pid();" | Out-Null
+    docker exec my-photo-gallery-immich-postgres psql -U $dbUser -d postgres -c "SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = '$dbName' AND pid <> pg_backend_pid();" | Out-Null
 
-    Write-Host "[*] Dropping database immich..." -ForegroundColor Yellow
-    docker exec my-photo-gallery-immich-postgres dropdb -U postgres --if-exists immich
+    Write-Host "[*] Dropping database $dbName..." -ForegroundColor Yellow
+    docker exec my-photo-gallery-immich-postgres dropdb -U $dbUser --if-exists $dbName
     if ($LASTEXITCODE -ne 0) {
         Write-Error "Failed to drop database."
         exit 1
     }
 
-    Write-Host "[*] Creating database immich..." -ForegroundColor Yellow
-    docker exec my-photo-gallery-immich-postgres createdb -U postgres immich
+    Write-Host "[*] Creating database $dbName..." -ForegroundColor Yellow
+    docker exec my-photo-gallery-immich-postgres createdb -U $dbUser $dbName
     if ($LASTEXITCODE -ne 0) {
         Write-Error "Failed to create database."
         exit 1
     }
 
     Write-Host "[*] Restoring database dump (this may take a moment)..." -ForegroundColor Yellow
-    docker exec my-photo-gallery-immich-postgres pg_restore -U postgres -d immich --clean --if-exists /tmp/immich-postgres.dump
+    docker exec my-photo-gallery-immich-postgres pg_restore -U $dbUser -d $dbName --clean --if-exists /tmp/immich-postgres.dump
     if ($LASTEXITCODE -ne 0) {
         Write-Error "Database restoration failed."
         exit 1
