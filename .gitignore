@@ -1,0 +1,9 @@
+.env
+backup/
+rclone-config/*
+!rclone-config/rclone.conf.example
+*.log
+.DS_Store
+Thumbs.db
+migration_guide.md
+
